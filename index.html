@@ -137,7 +137,7 @@ CREATE POLICY "Users insert/read own queries" ON public.submitted_queries FOR AL
         const SUPABASE_URL = 'https://YOUR_SUPABASE_PROJECT_ID.supabase.co';
         const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
         
-        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
         const SYSTEM_ADMIN_UUID = '00000000-0000-0000-0000-000000000001';
 
         const EXPERTS = [
@@ -165,8 +165,8 @@ CREATE POLICY "Users insert/read own queries" ON public.submitted_queries FOR AL
                 app.renderViewport();
             },
             checkSession: async () => {
-                if (!supabase) return;
-                const { data: { session } } = await supabase.auth.getSession();
+                if (!supabaseClient) return;
+                const { data: { session } } = await supabaseClient.auth.getSession();
                 appState.user = session ? session.user : null;
                 app.updateAuthUI();
             },
@@ -187,7 +187,7 @@ CREATE POLICY "Users insert/read own queries" ON public.submitted_queries FOR AL
                 alert("Auth Modal triggered.");
             },
             signOut: async () => {
-                if (supabase) await supabase.auth.signOut();
+                if (supabaseClient) await supabaseClient.auth.signOut();
                 appState.user = null;
                 app.updateAuthUI();
             },
