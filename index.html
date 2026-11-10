@@ -124,6 +124,9 @@ CREATE POLICY "Users insert/read own queries" ON public.submitted_queries FOR AL
 </code></pre>
         </section>
 
+        <!-- Phase 2 Navigation Tabs -->
+        <nav id="nav-tabs" class="flex flex-wrap items-center gap-2"></nav>
+
         <!-- Dynamic Viewport Area -->
         <div id="app-viewport">
             <div class="text-center py-12 text-gray-500">
@@ -132,12 +135,14 @@ CREATE POLICY "Users insert/read own queries" ON public.submitted_queries FOR AL
         </div>
     </main>
 
-    <!-- Phase 1 Core JavaScript Engine -->
+    <!-- Phase 2 Core JavaScript Engine -->
     <script>
         const SUPABASE_URL = 'https://YOUR_SUPABASE_PROJECT_ID.supabase.co';
         const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-        
-        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+        const supabase = (window.supabase && !SUPABASE_URL.includes('YOUR_') && !SUPABASE_ANON_KEY.includes('YOUR_'))
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
         const SYSTEM_ADMIN_UUID = '00000000-0000-0000-0000-000000000001';
 
         const EXPERTS = [
@@ -148,6 +153,8 @@ CREATE POLICY "Users insert/read own queries" ON public.submitted_queries FOR AL
             { id: 'expert-05', name: 'Football Historian', category: 'History', badgeColor: '#9F1239', bio: 'Era comparisons, historic rule evolutions, and statistical milestones.' }
         ];
 
+        const CATEGORIES = ['All', ...new Set(EXPERTS.map(e => e.category))];
+
         const appState = {
             activeView: 1,
             user: null,
@@ -155,14 +162,60 @@ CREATE POLICY "Users insert/read own queries" ON public.submitted_queries FOR AL
             searchQuery: '',
             articles: [],
             bookmarks: [],
+            queries: [],
+            authMode: 'signin',
             offlineQueue: JSON.parse(localStorage.getItem('gridiron_offline_queue') || '[]')
+        };
+
+        const escapeHtml = (value) => String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+
+        const formatDate = (iso) => iso
+            ? new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+            : '';
+
+        const toast = (message, isError = false) => {
+            const el = document.createElement('div');
+            el.className = `fixed bottom-6 right-6 z-[100] px-4 py-2.5 rounded-lg text-sm font-medium shadow-xl transition-opacity duration-300 ${isError ? 'bg-red-600' : 'bg-emerald-600'} text-white`;
+            el.textContent = message;
+            document.body.appendChild(el);
+            setTimeout(() => { el.style.opacity = '0'; }, 2600);
+            setTimeout(() => el.remove(), 3000);
+        };
+
+        const persistQueue = () => localStorage.setItem('gridiron_offline_queue', JSON.stringify(appState.offlineQueue));
+
+        const queueMutation = (mutation) => {
+            appState.offlineQueue.push(mutation);
+            persistQueue();
+            toast('Saved to offline queue — will retry automatically.', true);
         };
 
         const app = {
             init: async () => {
-                console.log("Phase 1 Engine Loaded.");
-                app.checkSession();
+                console.log('Phase 2 Engine Loaded.');
+                app.renderNav();
                 app.renderViewport();
+                await app.checkSession();
+                await app.seedExperts();
+                await app.loadArticles();
+                await app.loadBookmarks();
+                await app.loadQueries();
+                await app.flushOfflineQueue();
+                app.renderNav();
+                app.renderViewport();
+                if (supabase) {
+                    supabase.auth.onAuthStateChange((_event, session) => {
+                        appState.user = session ? session.user : null;
+                        app.updateAuthUI();
+                        app.renderNav();
+                        app.renderViewport();
+                    });
+                }
             },
             checkSession: async () => {
                 if (!supabase) return;
@@ -184,28 +237,444 @@ CREATE POLICY "Users insert/read own queries" ON public.submitted_queries FOR AL
                 }
             },
             toggleAuthModal: () => {
-                alert("Auth Modal triggered.");
+                const modal = document.getElementById('auth-modal');
+                if (modal.classList.contains('hidden')) {
+                    app.renderAuthModal();
+                    modal.classList.remove('hidden');
+                } else {
+                    modal.classList.add('hidden');
+                }
+            },
+            setAuthMode: (mode) => {
+                appState.authMode = mode;
+                app.renderAuthModal();
+            },
+            renderAuthModal: () => {
+                const isSignup = appState.authMode === 'signup';
+                document.getElementById('auth-modal-content').innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-white">${isSignup ? 'Create Account' : 'Welcome Back'}</h3>
+                        <button onclick="app.closeModal('auth-modal')" class="text-gray-400 hover:text-white text-xl leading-none">×</button>
+                    </div>
+                    <form onsubmit="app.submitAuth(event)" class="space-y-3">
+                        <input type="email" name="email" required placeholder="you@example.com"
+                            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500" />
+                        <input type="password" name="password" required minlength="6" placeholder="Password (min 6 characters)"
+                            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500" />
+                        <button type="submit" class="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-bold transition">
+                            ${isSignup ? 'Register' : 'Sign In'}
+                        </button>
+                    </form>
+                    <p class="text-xs text-gray-400 text-center">
+                        ${isSignup ? 'Already have an account?' : 'New to the board?'}
+                        <button onclick="app.setAuthMode('${isSignup ? 'signin' : 'signup'}')" class="text-blue-400 hover:underline font-semibold">
+                            ${isSignup ? 'Sign In' : 'Create one'}
+                        </button>
+                    </p>
+                `;
+            },
+            submitAuth: async (event) => {
+                event.preventDefault();
+                if (!supabase) return toast('Supabase is not configured yet.', true);
+                const fd = new FormData(event.target);
+                const email = fd.get('email');
+                const password = fd.get('password');
+                if (appState.authMode === 'signup') {
+                    const { error } = await supabase.auth.signUp({ email, password });
+                    if (error) return toast(error.message, true);
+                    app.toggleAuthModal();
+                    toast('Account created! Check your inbox to confirm your email.');
+                } else {
+                    const { error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) return toast(error.message, true);
+                    app.toggleAuthModal();
+                    toast('Signed in. Welcome to the board.');
+                }
             },
             signOut: async () => {
                 if (supabase) await supabase.auth.signOut();
                 appState.user = null;
+                appState.bookmarks = [];
+                appState.queries = [];
                 app.updateAuthUI();
+                app.setView(1);
+            },
+            closeModal: (id) => document.getElementById(id).classList.add('hidden'),
+
+            setView: (view) => {
+                appState.activeView = view;
+                app.renderNav();
+                app.renderViewport();
+            },
+            setCategory: (category) => {
+                appState.activeCategory = category;
+                app.renderViewport();
+            },
+            setSearchQuery: (query) => {
+                appState.searchQuery = query;
+                app.renderViewport();
+                const input = document.querySelector('#app-viewport input[type="search"]');
+                if (input) {
+                    input.focus();
+                    input.setSelectionRange(query.length, query.length);
+                }
+            },
+
+            seedExperts: async () => {
+                if (!supabase) return;
+                const rows = EXPERTS.map(e => ({
+                    id: e.id,
+                    name: e.name,
+                    category: e.category,
+                    bio: e.bio,
+                    badge_color: e.badgeColor
+                }));
+                const { error } = await supabase.from('experts').upsert(rows, { onConflict: 'id' });
+                if (error) console.warn('Expert seed skipped:', error.message);
+            },
+            loadArticles: async () => {
+                if (!supabase) return;
+                const { data, error } = await supabase.from('articles').select('*').order('created_at', { ascending: false });
+                if (error) return toast('Failed to load articles: ' + error.message, true);
+                appState.articles = data || [];
+            },
+            loadBookmarks: async () => {
+                if (!supabase || !appState.user) {
+                    appState.bookmarks = [];
+                    return;
+                }
+                const { data, error } = await supabase.from('user_bookmarks').select('article_id').eq('user_id', appState.user.id);
+                if (error) return;
+                appState.bookmarks = (data || []).map(b => b.article_id);
+            },
+            loadQueries: async () => {
+                if (!supabase || !appState.user) {
+                    appState.queries = [];
+                    return;
+                }
+                const { data, error } = await supabase.from('submitted_queries').select('*').eq('user_id', appState.user.id).order('created_at', { ascending: false });
+                if (!error) appState.queries = data || [];
+            },
+
+            toggleBookmark: async (articleId) => {
+                if (!supabase) return queueMutation({ type: 'bookmark_add', payload: { article_id: articleId } });
+                if (!appState.user) {
+                    toast('Sign in to bookmark articles.', true);
+                    app.toggleAuthModal();
+                    return;
+                }
+                if (appState.bookmarks.includes(articleId)) {
+                    const { error } = await supabase.from('user_bookmarks')
+                        .delete()
+                        .eq('user_id', appState.user.id)
+                        .eq('article_id', articleId);
+                    if (error) return toast(error.message, true);
+                    appState.bookmarks = appState.bookmarks.filter(id => id !== articleId);
+                } else {
+                    const { error } = await supabase.from('user_bookmarks')
+                        .insert({ user_id: appState.user.id, article_id: articleId });
+                    if (error) return toast(error.message, true);
+                    appState.bookmarks.push(articleId);
+                }
+                app.renderNav();
+                app.renderViewport();
+            },
+
+            submitQuery: async (event) => {
+                event.preventDefault();
+                const text = (new FormData(event.target).get('query_text') || '').trim();
+                if (!text) return toast('Write a question first.', true);
+                if (!supabase || !appState.user) return queueMutation({ type: 'query_insert', payload: { query_text: text } });
+                const { error } = await supabase.from('submitted_queries')
+                    .insert({ user_id: appState.user.id, query_text: text });
+                if (error) return toast(error.message, true);
+                event.target.reset();
+                toast('Question submitted to the board.');
+                await app.loadQueries();
+                app.renderNav();
+                app.renderViewport();
+            },
+
+            createArticle: async (event) => {
+                event.preventDefault();
+                if (!appState.user) return toast('Sign in to publish.', true);
+                const fd = new FormData(event.target);
+                const payload = {
+                    expert_id: fd.get('expert_id'),
+                    category: fd.get('category'),
+                    title: (fd.get('title') || '').trim(),
+                    summary: (fd.get('summary') || '').trim(),
+                    full_text: (fd.get('full_text') || '').trim()
+                };
+                if (payload.title.length < 3) return toast('Title must be at least 3 characters.', true);
+                if (!payload.summary || !payload.full_text) return toast('Summary and full text are required.', true);
+                payload.author_id = appState.user.id;
+                if (!supabase) return queueMutation({ type: 'article_insert', payload });
+                const { error } = await supabase.from('articles').insert(payload);
+                if (error) return toast(error.message, true);
+                event.target.reset();
+                toast('Article published.');
+                await app.loadArticles();
+                app.setView(1);
+            },
+
+            flushOfflineQueue: async () => {
+                if (!supabase || !appState.user || !appState.offlineQueue.length) return;
+                const before = appState.offlineQueue.length;
+                const remaining = [];
+                for (const mutation of appState.offlineQueue) {
+                    const ok = await app.applyMutation(mutation);
+                    if (!ok) remaining.push(mutation);
+                }
+                appState.offlineQueue = remaining;
+                persistQueue();
+                if (remaining.length < before) toast(`Synced ${before - remaining.length} queued action(s).`);
+            },
+            applyMutation: async (mutation) => {
+                if (!supabase || !appState.user) return false;
+                let error = null;
+                if (mutation.type === 'bookmark_add') {
+                    ({ error } = await supabase.from('user_bookmarks')
+                        .insert({ user_id: appState.user.id, article_id: mutation.payload.article_id }));
+                    if (error && error.code === '23505') error = null;
+                } else if (mutation.type === 'query_insert') {
+                    ({ error } = await supabase.from('submitted_queries')
+                        .insert({ user_id: appState.user.id, query_text: mutation.payload.query_text }));
+                } else if (mutation.type === 'article_insert') {
+                    ({ error } = await supabase.from('articles')
+                        .insert({ ...mutation.payload, author_id: appState.user.id }));
+                }
+                return !error;
+            },
+
+            openArticle: (id) => {
+                const article = appState.articles.find(a => a.id === id);
+                if (!article) return;
+                const expert = EXPERTS.find(e => e.id === article.expert_id);
+                const color = expert ? expert.badgeColor : '#6B7280';
+                const bookmarked = appState.bookmarks.includes(article.id);
+                document.getElementById('article-modal-content').innerHTML = `
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold" style="background:${color}26;color:${color}">
+                            <span class="w-2 h-2 rounded-full" style="background:${color}"></span>${escapeHtml(expert ? expert.name : article.category)}
+                        </span>
+                        <button onclick="app.closeModal('article-modal')" class="text-gray-400 hover:text-white text-xl leading-none">×</button>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">${escapeHtml(article.title)}</h3>
+                    <p class="text-xs text-gray-500">Published ${formatDate(article.created_at)}${article.updated_at && article.updated_at !== article.created_at ? ` · updated ${formatDate(article.updated_at)}` : ''}</p>
+                    <p class="text-sm text-gray-300 border-l-2 pl-3" style="border-color:${color}">${escapeHtml(article.summary)}</p>
+                    <p class="text-sm text-gray-200 whitespace-pre-wrap leading-relaxed">${escapeHtml(article.full_text)}</p>
+                    <div class="flex justify-end pt-2">
+                        <button onclick="app.toggleBookmark('${article.id}'); app.openArticle('${article.id}');"
+                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition ${bookmarked ? 'bg-amber-600 hover:bg-amber-500' : 'bg-gray-700 hover:bg-gray-600'} text-white">
+                            ${bookmarked ? '🔖 Bookmarked' : '📑 Bookmark'}
+                        </button>
+                    </div>
+                `;
+                document.getElementById('article-modal').classList.remove('hidden');
+            },
+
+            renderNav: () => {
+                const nav = document.getElementById('nav-tabs');
+                if (!nav) return;
+                const tabs = [
+                    { id: 1, label: 'Articles', icon: '📰' },
+                    { id: 2, label: 'Bookmarks', icon: '🔖', count: appState.bookmarks.length },
+                    { id: 3, label: 'My Queries', icon: '❓', count: appState.queries.length },
+                    { id: 4, label: 'Write', icon: '✍️' }
+                ];
+                nav.innerHTML = tabs.map(t => `
+                    <button onclick="app.setView(${t.id})"
+                        class="px-4 py-2 rounded-lg text-sm font-semibold transition border ${appState.activeView === t.id ? 'bg-blue-600 border-blue-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'}">
+                        ${t.icon} ${t.label}${typeof t.count === 'number' ? ` <span class="text-xs opacity-75">(${t.count})</span>` : ''}
+                    </button>
+                `).join('');
             },
             renderViewport: () => {
                 const viewport = document.getElementById('app-viewport');
-                viewport.innerHTML = `
-                    <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 text-center space-y-4">
-                        <span class="text-4xl">🚀</span>
-                        <h3 class="text-xl font-bold text-white">Phase 1 Architecture Active</h3>
-                        <p class="text-sm text-gray-400 max-w-xl mx-auto">
-                            Database schemas, expert roster objects, and root DOM containers ready.
-                        </p>
-                    </div>
+                if (!supabase) {
+                    viewport.innerHTML = `
+                        <div class="bg-gray-800 border border-amber-700/50 rounded-xl p-8 text-center space-y-3">
+                            <span class="text-4xl">🛠️</span>
+                            <h3 class="text-lg font-bold text-white">Supabase Not Configured</h3>
+                            <p class="text-sm text-gray-400 max-w-xl mx-auto">
+                                Set SUPABASE_URL and SUPABASE_ANON_KEY in index.html, run the Phase 1 migration, then reload.
+                            </p>
+                            <p class="text-xs text-gray-500">Queued offline actions: ${appState.offlineQueue.length}</p>
+                        </div>
+                    `;
+                    return;
+                }
+                const views = {
+                    1: app.renderArticlesView,
+                    2: app.renderBookmarksView,
+                    3: app.renderQueriesView,
+                    4: app.renderWriteView
+                };
+                viewport.innerHTML = (views[appState.activeView] || app.renderArticlesView)();
+            },
+            signInPrompt: (message) => `
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-10 text-center space-y-4">
+                    <span class="text-4xl">🔐</span>
+                    <p class="text-sm text-gray-400 max-w-md mx-auto">${escapeHtml(message)}</p>
+                    <button onclick="app.toggleAuthModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-semibold transition">
+                        Sign In / Register
+                    </button>
+                </div>
+            `,
+            renderArticlesView: () => {
+                const query = appState.searchQuery.toLowerCase();
+                const filtered = appState.articles.filter(a => {
+                    const matchesCategory = appState.activeCategory === 'All' || a.category === appState.activeCategory;
+                    const haystack = `${a.title} ${a.summary} ${a.full_text}`.toLowerCase();
+                    return matchesCategory && (!query || haystack.includes(query));
+                });
+                return `
+                    <section class="space-y-5">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <h2 class="text-lg font-bold text-white">📰 Advisory Articles</h2>
+                            <input type="search" value="${escapeHtml(appState.searchQuery)}" oninput="app.setSearchQuery(this.value)"
+                                placeholder="Search articles..."
+                                class="w-full md:w-72 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500" />
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            ${CATEGORIES.map(c => `
+                                <button onclick="app.setCategory('${escapeHtml(c)}')"
+                                    class="px-3 py-1.5 rounded-full text-xs font-semibold border transition ${appState.activeCategory === c ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'}">
+                                    ${escapeHtml(c)}
+                                </button>
+                            `).join('')}
+                        </div>
+                        ${filtered.length ? `
+                            <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                                ${filtered.map(app.articleCard).join('')}
+                            </div>
+                        ` : `
+                            <div class="bg-gray-800 border border-gray-700 rounded-xl p-10 text-center text-sm text-gray-400">
+                                No articles match. ${appState.articles.length ? 'Try a different search or category.' : `Be the first to <button onclick="app.setView(4)" class="text-blue-400 underline">publish one</button>.`}
+                            </div>
+                        `}
+                    </section>
+                `;
+            },
+            articleCard: (article) => {
+                const expert = EXPERTS.find(e => e.id === article.expert_id);
+                const color = expert ? expert.badgeColor : '#6B7280';
+                const bookmarked = appState.bookmarks.includes(article.id);
+                return `
+                    <article class="bg-gray-800 border border-gray-700 rounded-xl p-5 flex flex-col space-y-3 hover:border-gray-600 transition">
+                        <div class="flex items-start justify-between gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold" style="background:${color}26;color:${color}">
+                                <span class="w-2 h-2 rounded-full" style="background:${color}"></span>${escapeHtml(expert ? expert.category : article.category)}
+                            </span>
+                            <button onclick="app.toggleBookmark('${article.id}')" title="${bookmarked ? 'Remove bookmark' : 'Bookmark'}" class="text-lg leading-none hover:scale-110 transition">${bookmarked ? '🔖' : '📑'}</button>
+                        </div>
+                        <h3 onclick="app.openArticle('${article.id}')" class="cursor-pointer text-base font-bold text-white hover:text-blue-400 transition">${escapeHtml(article.title)}</h3>
+                        <p class="text-sm text-gray-400 flex-1">${escapeHtml(article.summary)}</p>
+                        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t border-gray-700/60">
+                            <span>${escapeHtml(expert ? expert.name : 'Unknown expert')}</span>
+                            <span>${formatDate(article.created_at)}</span>
+                        </div>
+                    </article>
+                `;
+            },
+            renderBookmarksView: () => {
+                if (!appState.user) return app.signInPrompt('Bookmark articles to build your personal playbook.');
+                const saved = appState.articles.filter(a => appState.bookmarks.includes(a.id));
+                return `
+                    <section class="space-y-5">
+                        <h2 class="text-lg font-bold text-white">🔖 Your Bookmarks</h2>
+                        ${saved.length ? `
+                            <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                                ${saved.map(app.articleCard).join('')}
+                            </div>
+                        ` : `
+                            <div class="bg-gray-800 border border-gray-700 rounded-xl p-10 text-center text-sm text-gray-400">
+                                No bookmarks yet. Browse the <button onclick="app.setView(1)" class="text-blue-400 underline">Articles</button> tab and tap 📑 to save.
+                            </div>
+                        `}
+                    </section>
+                `;
+            },
+            renderQueriesView: () => {
+                if (!appState.user) return app.signInPrompt('Submit questions to the advisory board and track them here.');
+                return `
+                    <section class="grid gap-6 lg:grid-cols-2">
+                        <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-4">
+                            <h2 class="text-lg font-bold text-white">❓ Ask the Board</h2>
+                            <form onsubmit="app.submitQuery(event)" class="space-y-3">
+                                <textarea name="query_text" rows="5" required
+                                    placeholder="e.g. How do modern NFL offenses attack a Cover 3 shell?"
+                                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-emerald-500"></textarea>
+                                <button type="submit" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm font-bold transition">
+                                    Submit Question
+                                </button>
+                            </form>
+                        </div>
+                        <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-3">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wide">Your Submissions (${appState.queries.length})</h3>
+                            ${appState.queries.length ? appState.queries.map(q => `
+                                <div class="bg-gray-900 border border-gray-700 rounded-lg p-3">
+                                    <p class="text-sm text-gray-200">${escapeHtml(q.query_text)}</p>
+                                    <p class="text-[11px] text-gray-500 mt-1">${formatDate(q.created_at)}</p>
+                                </div>
+                            `).join('') : '<p class="text-sm text-gray-500">No questions yet.</p>'}
+                        </div>
+                    </section>
+                `;
+            },
+            renderWriteView: () => {
+                if (!appState.user) return app.signInPrompt('Publish analysis under one of the five expert personas.');
+                const options = EXPERTS.map(e =>
+                    `<option value="${e.id}" data-category="${escapeHtml(e.category)}">${escapeHtml(e.name)} — ${escapeHtml(e.category)}</option>`
+                ).join('');
+                return `
+                    <section class="max-w-2xl mx-auto bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-4">
+                        <h2 class="text-lg font-bold text-white">✍️ Publish an Article</h2>
+                        <form onsubmit="app.createArticle(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Expert Persona</label>
+                                <select name="expert_id" onchange="this.form.category.value=this.selectedOptions[0].dataset.category"
+                                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-blue-500">
+                                    ${options}
+                                </select>
+                                <input type="hidden" name="category" value="${EXPERTS[0].category}" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Title</label>
+                                <input name="title" required minlength="3" maxlength="120" placeholder="e.g. Attacking Cover 3 with Trips Formations"
+                                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Summary</label>
+                                <input name="summary" required maxlength="200" placeholder="One-sentence hook shown on the card"
+                                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Full Analysis</label>
+                                <textarea name="full_text" required rows="10" placeholder="Full breakdown..."
+                                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500"></textarea>
+                            </div>
+                            <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-bold transition">
+                                Publish Article
+                            </button>
+                        </form>
+                    </section>
                 `;
             }
         };
 
         document.addEventListener('DOMContentLoaded', app.init);
     </script>
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-[90] bg-black/70 flex items-center justify-center p-4" onclick="if(event.target===this)app.closeModal('auth-modal')">
+        <div id="auth-modal-content" class="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-sm space-y-4"></div>
+    </div>
+
+    <!-- Article Detail Modal -->
+    <div id="article-modal" class="hidden fixed inset-0 z-[90] bg-black/70 flex items-center justify-center p-4" onclick="if(event.target===this)app.closeModal('article-modal')">
+        <div id="article-modal-content" class="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto space-y-4"></div>
+    </div>
+
 </body>
 </html>
