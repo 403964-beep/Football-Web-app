@@ -6,8 +6,8 @@ This project is a static HTML page. The `Start application` workflow serves it o
 python3 -m http.server 5000 --bind 0.0.0.0
 ```
 
-No dependency installation or environment secrets are needed to view the page. Tailwind CSS and the Supabase browser library load from public CDNs, so viewing it requires internet access.
+No dependency installation or environment secrets are needed to view the page. Tailwind CSS and the Inter font load from public CDNs, so styling requires internet access.
 
-The imported page is a Phase 1 prototype: it displays database setup SQL and an architecture status panel. The Sign In / Register button currently only displays an alert; authentication and database-backed screens are not implemented.
+The page is a Phase 1 dashboard prototype with a local expert roster, a SQL schema preview, a setup status console, and a clearly labeled local demo session. It does not implement real authentication or database-backed screens. Its connection check reports that Supabase is unconfigured; it does not make a network request or claim a successful connection.
 
-The page includes placeholder Supabase project settings. The client stays disabled while these placeholders are present, avoiding requests to a nonexistent project. Future database work requires a real Supabase project, applying the displayed SQL after review, and implementing the missing user flows. Never put a Supabase service-role key in this public HTML file.
+The SQL is displayed for review only and is never executed by the page. Before applying it to a Supabase project, review the row-level security policies and privileges for your use case. Future database work requires configuring a real Supabase project and implementing the missing user flows. Never put a Supabase service-role key in this public HTML file.
