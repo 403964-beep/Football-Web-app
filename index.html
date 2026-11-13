@@ -137,7 +137,10 @@ CREATE POLICY "Users insert/read own queries" ON public.submitted_queries FOR AL
         const SUPABASE_URL = 'https://YOUR_SUPABASE_PROJECT_ID.supabase.co';
         const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
         
-        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+        const supabaseConfigured = !SUPABASE_URL.includes('YOUR_SUPABASE_') && !SUPABASE_ANON_KEY.includes('YOUR_SUPABASE_');
+        const supabaseClient = window.supabase && supabaseConfigured
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
         const SYSTEM_ADMIN_UUID = '00000000-0000-0000-0000-000000000001';
 
         const EXPERTS = [
