@@ -8,6 +8,6 @@ python3 -m http.server 5000 --bind 0.0.0.0
 
 No dependency installation or environment secrets are needed to view the page. Tailwind CSS and the Inter font load from public CDNs, so styling requires internet access.
 
-The page is a Phase 1 dashboard prototype with a local expert roster, a SQL schema preview, a setup status console, and a clearly labeled local demo session. It does not implement real authentication or database-backed screens. Its connection check reports that Supabase is unconfigured; it does not make a network request or claim a successful connection.
+The page is a static single-page football advisory app. It has a responsive roster/content navigation, five expert profiles, ten locally seeded sample articles, category filters and live counts, and an on-demand database schema modal. Tailwind CSS and the Inter font load from public CDNs.
 
-The SQL is displayed for review only and is never executed by the page. Before applying it to a Supabase project, review the row-level security policies and privileges for your use case. Future database work requires configuring a real Supabase project and implementing the missing user flows. Never put a Supabase service-role key in this public HTML file.
+The article data and counts are currently local to the browser; they are not persisted to Supabase. The SQL is displayed for review only and is never executed by the page. Before applying it to a Supabase project, review the row-level security policies and privileges for your use case. Never put a Supabase service-role key in this public HTML file.
