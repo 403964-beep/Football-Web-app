@@ -248,6 +248,14 @@
     display: none;
   }
 
+  #auth-root .auth-control-primary {
+    display: none;
+  }
+
+  #auth-root .auth-actions {
+    gap: 0.3rem;
+  }
+
   .auth-control {
     padding: 0.45rem 0.6rem;
     font-size: 0.68rem;

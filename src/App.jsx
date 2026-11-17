@@ -98,6 +98,21 @@ const appearance = {
   },
 };
 
+const clerkLocalization = {
+  signIn: {
+    start: {
+      title: "Welcome back",
+      subtitle: "Sign in to return to The Flock Forecast",
+    },
+  },
+  signUp: {
+    start: {
+      title: "Join the Flock",
+      subtitle: "Create an account to continue",
+    },
+  },
+};
+
 function LogoutButton() {
   const { signOut } = useClerk();
   return (
@@ -178,14 +193,6 @@ function SignInPage() {
         signUpUrl={`${basePath}/sign-up`}
         forceRedirectUrl={`${basePath}/`}
         appearance={appearance}
-        localization={{
-          signIn: {
-            start: {
-              title: "Welcome back",
-              subtitle: "Sign in to return to The Flock Forecast",
-            },
-          },
-        }}
       />
     </AuthScreen>
   );
@@ -200,14 +207,6 @@ function SignUpPage() {
         signInUrl={`${basePath}/sign-in`}
         forceRedirectUrl={`${basePath}/`}
         appearance={appearance}
-        localization={{
-          signUp: {
-            start: {
-              title: "Create your account",
-              subtitle: "Get started with The Flock Forecast",
-            },
-          },
-        }}
       />
     </AuthScreen>
   );
@@ -286,6 +285,7 @@ function ClerkApp() {
       publishableKey={clerkPubKey}
       proxyUrl={clerkProxyUrl}
       appearance={appearance}
+      localization={clerkLocalization}
       signInUrl={`${basePath}/sign-in`}
       signUpUrl={`${basePath}/sign-up`}
       routerPush={(to) => setLocation(stripBase(to))}
