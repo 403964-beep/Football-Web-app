@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="The Flock Forecast">
+  <rect width="64" height="64" rx="15" fill="#171045"/>
+  <rect x="2" y="2" width="60" height="60" rx="13" fill="none" stroke="#C49B1A" stroke-width="2"/>
+  <path d="M18 30c0-7.4 6-13.4 13.4-13.4h9.8v7.8h-9.8a5.6 5.6 0 0 0-5.6 5.6v2h15.4v7.5H25.8v10.9H18V30Z" fill="#F8FAFC"/>
+  <path d="M46 19.5 51 24l-5 4.5-5-4.5 5-4.5Z" fill="#C49B1A"/>
+</svg>

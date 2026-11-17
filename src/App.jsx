@@ -1,6 +1,5 @@
 import {
   ClerkProvider,
-  RedirectToSignIn,
   Show,
   SignIn,
   SignUp,
@@ -214,7 +213,7 @@ function SignUpPage() {
   );
 }
 
-function UserPortal() {
+function UserPortalCard() {
   const { user } = useUser();
   return createPortal(
     <main className="auth-screen">
@@ -233,6 +232,19 @@ function UserPortal() {
       </section>
     </main>,
     document.body,
+  );
+}
+
+function UserPortal() {
+  return (
+    <>
+      <Show when="signed-in">
+        <UserPortalCard />
+      </Show>
+      <Show when="signed-out">
+        <Redirect to="/" />
+      </Show>
+    </>
   );
 }
 

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#020617">
+  <title>The Flock Forecast</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>:root{--ravens:#241773;--ravens-deep:#171045;--metallic-gold:#c49b1a}body{font-family:Inter,ui-sans-serif,system-ui,sans-serif}button:focus-visible,summary:focus-visible{outline:2px solid var(--metallic-gold);outline-offset:3px}.gold-text{color:#e3bf52}.video-frame{width:max(100vw,177.78vh);height:max(100vh,56.25vw);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.video-frame iframe{border:0;position:absolute;inset:0;width:100%!important;height:100%!important}.view-enter{animation:.22s ease-out enter}@keyframes enter{0%{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}@media (prefers-reduced-motion:reduce){*,:before,:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}</style>
+  <script type="module" crossorigin src="/assets/index-BBQa1mw5.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Df5Bj0Y7.css">
+</head>
+<body class="min-h-screen text-slate-100 selection:bg-[#C49B1A] selection:text-[#171045]">
+  <div class="fixed inset-0 z-0 overflow-hidden bg-[#0b0918]" aria-hidden="true">
+    <img id="video-poster" class="absolute inset-0 hidden h-full w-full object-cover" alt="">
+    <div id="ravens-video" class="video-frame pointer-events-none"></div>
+    <div class="absolute inset-0 bg-[#080611]/50"></div>
+  </div>
+  <div id="site-shell" class="relative z-10">
+  <header class="sticky top-0 z-40 border-b border-[#C49B1A]/50 bg-[#241773]/85 shadow-lg shadow-black/20 backdrop-blur-md">
+    <div class="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E3BF52]/50 bg-[#171045] text-xl shadow-lg">🏈</div>
+        <div>
+          <h1 class="text-sm font-extrabold tracking-tight text-white sm:text-base">The Flock Forecast</h1>
+          <span class="font-mono text-[10px] uppercase tracking-widest text-[#E3BF52]">Expert analysis · 2026</span>
+        </div>
+      </div>
+      <nav class="hidden items-center gap-2 md:flex" aria-label="Main navigation">
+        <button type="button" data-view-target="roster" class="nav-link rounded-lg px-4 py-2 text-sm font-semibold transition">Expert Roster</button>
+        <button type="button" data-view-target="content" class="nav-link rounded-lg px-4 py-2 text-sm font-semibold transition">Content Stream</button>
+        <button type="button" data-background-toggle class="rounded-lg px-3 py-2 text-xs font-semibold text-white/90 transition hover:bg-white/10">Pause video</button>
+        <button type="button" data-schema-open class="ml-2 rounded-lg border border-[#E3BF52]/70 bg-[#171045]/60 px-4 py-2 text-sm font-semibold text-[#F0D577] transition hover:bg-[#171045]">⚡ DB Schema</button>
+      </nav>
+      <div class="flex items-center gap-2 md:hidden">
+        <button type="button" data-schema-open class="rounded-lg border border-[#E3BF52]/70 px-3 py-2 text-xs font-semibold text-[#F0D577]">⚡ Schema</button>
+        <button id="menu-toggle" type="button" class="rounded-lg border border-white/25 p-2 text-white" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-menu">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+      <div id="auth-root" class="shrink-0"></div>
+    </div>
+    <nav id="mobile-menu" class="hidden border-t border-white/15 px-4 py-3 md:hidden" aria-label="Mobile navigation">
+      <div class="mx-auto flex max-w-7xl flex-col gap-2">
+        <button type="button" data-view-target="roster" class="nav-link rounded-lg px-4 py-3 text-left text-sm font-semibold">Expert Roster</button>
+        <button type="button" data-view-target="content" class="nav-link rounded-lg px-4 py-3 text-left text-sm font-semibold">Content Stream</button>
+        <button type="button" data-background-toggle class="rounded-lg px-4 py-3 text-left text-sm font-semibold text-white/90">Pause background video</button>
+        <button type="button" data-schema-open class="rounded-lg px-4 py-3 text-left text-sm font-semibold text-[#F0D577]">⚡ Open DB Schema</button>
+      </div>
+    </nav>
+  </header>
+  <main class="mx-auto w-full max-w-7xl space-y-7 px-4 py-7 sm:px-6">
+    <section class="relative overflow-hidden rounded-2xl border border-[#C49B1A]/50 bg-gradient-to-br from-[#241773]/75 via-[#1d1555]/70 to-[#110e24]/80 p-6 shadow-xl backdrop-blur-sm sm:p-8">
+      <span class="pointer-events-none absolute -bottom-10 -right-8 select-none text-9xl opacity-10" aria-hidden="true">🏈</span>
+      <div class="relative max-w-3xl space-y-3">
+        <span class="text-xs font-semibold uppercase tracking-[.2em] text-[#E3BF52]">Ravens Football Advisory</span>
+        <h2 class="text-2xl font-black tracking-tight text-white sm:text-3xl">The game, from every angle.</h2>
+        <p class="text-sm leading-relaxed text-slate-200">Five specialists. Ten perspectives. Explore football strategy, line play, roster management, performance, and history.</p>
+      </div>
+    </section>
+    <section id="roster-view" data-view="roster" class="view-enter space-y-5">
+      <div class="flex items-end justify-between gap-3">
+        <div><p class="text-xs font-bold uppercase tracking-[.16em] text-[#E3BF52]">View 1</p><h2 class="mt-1 text-xl font-extrabold text-white">Expert Roster</h2><p class="mt-1 text-sm text-slate-400">Choose a specialist to see their articles.</p></div>
+        <span class="shrink-0 rounded-full border border-[#C49B1A]/40 bg-[#241773]/40 px-3 py-1.5 text-xs font-semibold text-[#F0D577]">5 specialists · 10 articles</span>
+      </div>
+      <div id="roster-grid" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+    <section id="content-view" data-view="content" hidden class="view-enter space-y-5">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div><p class="text-xs font-bold uppercase tracking-[.16em] text-[#E3BF52]">View 2</p><h2 class="mt-1 text-xl font-extrabold text-white">Content Stream</h2><p class="mt-1 text-sm text-slate-400">Field notes and analysis from the full advisory board.</p></div>
+        <button id="back-to-roster" type="button" class="rounded-lg border border-white/15 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-[#C49B1A]/60 hover:text-[#F0D577]">← Expert roster</button>
+      </div>
+      <div id="category-filters" class="flex flex-wrap gap-2" role="group" aria-label="Filter articles by category"></div>
+      <p id="stream-count" class="text-xs text-slate-500" aria-live="polite"></p>
+      <div id="article-list" class="grid grid-cols-1 gap-4 lg:grid-cols-2"></div>
+    </section>
+
+    <div id="schema-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/75 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" aria-labelledby="schema-title">
+      <section class="mx-auto my-4 max-w-4xl space-y-4 rounded-2xl border border-[#C49B1A]/40 bg-[#121020] p-4 shadow-2xl sm:my-8 sm:p-6">
+      <div class="flex flex-col justify-between gap-4 border-b border-slate-800 pb-4 sm:flex-row sm:items-center">
+        <div><h2 id="schema-title" class="text-lg font-bold text-white">Supabase PostgreSQL Schema</h2><p class="text-xs text-slate-400">Review this migration and RLS script before running it in your Supabase project.</p></div>
+        <div class="flex gap-2"><button id="copy-sql-btn" class="rounded-lg border border-[#C49B1A]/50 px-4 py-2 text-xs font-semibold text-[#F0D577] transition hover:bg-[#241773]">Copy SQL script</button><button id="close-schema" type="button" class="rounded-lg border border-white/15 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-white/10">Close</button></div>
+      </div>
+      <div class="max-h-96 overflow-auto rounded-xl border border-slate-800 bg-slate-950 p-4">
+        <pre id="sql-code-block" class="whitespace-pre text-xs leading-relaxed text-emerald-400"><code>-- Phase 1: Supabase Database Migration Script
+
+CREATE TABLE IF NOT EXISTS public.experts (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    category TEXT NOT NULL,
+    bio TEXT NOT NULL,
+    badge_color TEXT NOT NULL
+);
+
+INSERT INTO public.experts (id, name, category, bio, badge_color) VALUES
+('expert-01', 'Tactical &amp; Film Analyst', 'Tactics', 'Playbook design, coverage shells, and strategic adjustments.', '#1E40AF'),
+('expert-02', 'Trench &amp; Line Specialist', 'Trench Play', 'Offensive and defensive line mechanics, leverage, and blocking.', '#B45309'),
+('expert-03', 'Roster &amp; Cap Strategist', 'Management', 'Salary cap management, contracts, and draft pick valuation.', '#6B21A8'),
+('expert-04', 'Sports Performance Specialist', 'Performance', 'Biomechanics, athletic testing, and injury recovery.', '#047857'),
+('expert-05', 'Football Historian', 'History', 'Era comparisons, rule changes, and statistical milestones.', '#9F1239')
+ON CONFLICT (id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS public.users (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT UNIQUE NOT NULL,
+    role TEXT DEFAULT 'member',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.users (id, email) VALUES (new.id, new.email);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+CREATE TABLE IF NOT EXISTS public.articles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    expert_id TEXT NOT NULL REFERENCES public.experts(id),
+    author_id UUID NOT NULL,
+    title TEXT NOT NULL CHECK (length(title) >= 3),
+    category TEXT NOT NULL,
+    summary TEXT NOT NULL,
+    full_text TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.user_bookmarks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    article_id UUID NOT NULL REFERENCES public.articles(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, article_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.submitted_queries (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    query_text TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.articles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public articles read access" ON public.articles FOR SELECT USING (true);
+CREATE POLICY "Users insert own articles" ON public.articles FOR INSERT WITH CHECK (auth.uid() = author_id);
+CREATE POLICY "Users update own articles" ON public.articles FOR UPDATE USING (auth.uid() = author_id);
+CREATE POLICY "Users delete own articles" ON public.articles FOR DELETE USING (auth.uid() = author_id);
+
+ALTER TABLE public.user_bookmarks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own bookmarks" ON public.user_bookmarks FOR ALL USING (auth.uid() = user_id);
+
+ALTER TABLE public.submitted_queries ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own queries" ON public.submitted_queries FOR ALL USING (auth.uid() = user_id);</code></pre>
+      </div>
+      <p class="text-xs leading-relaxed text-amber-300">Security note: review the row-level security policies and database privileges for your use case before applying this SQL. This page does not run the migration.</p>
+      </section>
+    </div>
+  </main>
+  <div id="toast-container" class="pointer-events-none fixed bottom-5 right-5 z-[60] flex flex-col gap-2" aria-live="polite"></div>
+  <a id="video-fallback" class="fixed bottom-4 left-4 z-50 hidden rounded-lg border border-[#C49B1A]/60 bg-[#171045]/95 px-4 py-3 text-xs font-semibold text-[#F0D577] shadow-xl" href="https://www.youtube.com/watch?v=qz07gPQ-d8M" target="_blank" rel="noopener noreferrer">Highlights can’t play in the background · Watch on YouTube ↗</a>
+  </div>
+  <script>
+    const experts = [
+      {id:'expert-01',name:'Tactical & Film Analyst',category:'Tactics',color:'#3B82F6',bio:'Playbook design, coverage shells, pre-snap reads, and how small alignment changes shape a defensive structure.'},
+      {id:'expert-02',name:'Trench & Line Specialist',category:'Trench Play',color:'#C49B1A',bio:'Offensive and defensive line mechanics, leverage, pass-rush plans, and the details that decide a rep.'},
+      {id:'expert-03',name:'Roster & Cap Strategist',category:'Management',color:'#A78BFA',bio:'Roster construction, cap planning, contract trade-offs, and building flexibility across a season.'},
+      {id:'expert-04',name:'Sports Performance Specialist',category:'Performance',color:'#34D399',bio:'Movement quality, workload, recovery, and sustainable performance throughout the football calendar.'},
+      {id:'expert-05',name:'Football Historian',category:'History',color:'#FB7185',bio:'Football’s strategic roots, rule changes, and the ideas that connect different eras of the game.'}
+    ];
+    const articles = [
+      {id:'article-01',expertId:'expert-01',title:'Reading the Shell Before the Snap',summary:'A practical framework for turning defensive alignment into a useful pre-snap hypothesis.',body:[
+        'Start with the safeties, but do not stop there. Their depth and width suggest the broad structure, while corner leverage, linebacker spacing, and the location of the nickel defender help reveal how the defense plans to distribute the eligible receivers. Treat each clue as evidence rather than proof: disguise is part of the defense’s plan.',
+        'Build a short list of likely answers, then identify the route or motion that will distinguish them. A receiver split wide can widen a corner; a back shifting out can force the defense to declare its match rules. The goal is not to guess perfectly. It is to give the quarterback a clear first read and a sound answer if the picture changes after the snap.'
+      ]},
+      {id:'article-02',expertId:'expert-01',title:'Why Motion Changes the Picture',summary:'Use pre-snap movement to test coverage rules and create cleaner post-snap decisions.',body:[
+        'Motion is most useful when it asks a precise question. A receiver traveling across the formation may reveal whether a defender follows, passes the route to a teammate, or adjusts the coverage landmark. That response can help the offense identify man principles, zone spacing, or a pattern-match rule without requiring a complicated play.',
+        'The timing matters as much as the direction. Motion that settles before the snap gives the defense time to reset; motion that continues through the snap can create leverage or force communication under pressure. Pair movement with a route combination that has a simple answer against both likely reactions. The play should still work if the defense refuses to give away its plan.'
+      ]},
+      {id:'article-03',expertId:'expert-02',title:'Win the First Step Without Overreaching',summary:'Leverage starts with a balanced stance and a deliberate first step, not a desperate lunge.',body:[
+        'A lineman’s first step should preserve the ability to respond. An exaggerated step can create immediate movement, but it also narrows the base and gives a defender an easy path across the blocker’s face. A controlled step keeps the hips under the body and allows the hands to arrive in a strong position.',
+        'On film, review the first two steps separately from the finish. Ask whether the blocker gained the correct landmark, kept the shoulders square, and maintained inside leverage. If the answer is no, the correction usually begins with stance width, aiming point, or timing rather than more force. Consistent footwork gives power somewhere useful to go.'
+      ]},
+      {id:'article-04',expertId:'expert-02',title:'Build a Pass-Rush Plan, Not a Move List',summary:'A rush becomes more dangerous when each counter responds to the blocker’s adjustment.',body:[
+        'A collection of pass-rush moves is not yet a plan. The rusher needs an opening attack that threatens a specific edge or shoulder, then a counter that punishes the blocker for setting to stop it. If the blocker oversets to protect the edge, an inside counter becomes available. If the blocker sits inside, speed around the outside regains value.',
+        'The hand fight should support the footwork rather than replace it. Keep the approach angle, pad level, and finish tied to the quarterback’s location. A rusher who knows the intended counter before contact can stay patient, read the blocker’s weight transfer, and avoid wasting the rush by forcing a move that is not there.'
+      ]},
+      {id:'article-05',expertId:'expert-03',title:'Roster Flexibility Is a Season-Long Asset',summary:'Planning for uncertainty means leaving options open, not trying to predict every injury.',body:[
+        'A roster plan is strongest when it accounts for more than the opening-week depth chart. Injuries, role changes, and unexpected development can make a seemingly minor position group urgent. Mapping the next available player at each role exposes where one absence would require several other players to change jobs.',
+        'Flexibility also has a cost. A versatile reserve can protect multiple positions, but too much reliance on one player may leave the team exposed if that player becomes a starter elsewhere. Review the plan regularly, update the role assumptions, and preserve a practical path for adding help. The aim is not perfect prediction; it is reducing the number of emergencies that become crises.'
+      ]},
+      {id:'article-06',expertId:'expert-03',title:'Think in Windows When Managing the Cap',summary:'A multi-season view makes it easier to weigh short-term spending against future choices.',body:[
+        'The salary cap is not simply a yearly spending limit. Contract timing, guarantees, bonuses, and roster turnover connect decisions across several seasons. A team that focuses only on the current number can overlook the future cost of pushing money forward or the value of keeping an exit option available.',
+        'Build scenarios rather than a single forecast. One scenario can assume the player remains a core starter; another can account for a reduced role or a change in team priorities. Compare the cash commitment, cap impact, and replacement plan in each case. That process turns a contract discussion into a roster decision with explicit trade-offs instead of a bet on one outcome.'
+      ]},
+      {id:'article-07',expertId:'expert-04',title:'Recovery Starts With Repeatable Habits',summary:'Reliable sleep, hydration, and workload routines create a stronger base for recovery.',body:[
+        'Recovery is often discussed as a special intervention, but the most useful foundation is a consistent routine. Sleep opportunity, regular meals, hydration, and sensible spacing between demanding sessions influence how prepared an athlete feels when training resumes. A single tool cannot compensate for an unpredictable week.',
+        'Coaches and athletes can make the routine easier to follow by tracking a small number of signals consistently. Changes in soreness, energy, or movement quality are prompts for a conversation, not automatic diagnoses. When the signals point in different directions, staff can adjust the day’s workload and consult the appropriate health professional. Consistency makes those decisions clearer.'
+      ]},
+      {id:'article-08',expertId:'expert-04',title:'Train the Movement, Then Add the Decision',summary:'Progress from clean mechanics to game-like reactions without sacrificing movement quality.',body:[
+        'A movement pattern learned at low speed may change when an athlete must react to an opponent. A useful progression preserves the key mechanics while adding one challenge at a time: more speed, a visual cue, a change of direction, or a decision under time pressure. The athlete should know what a successful rep feels like before complexity increases.',
+        'Quality should guide the progression. If posture, balance, or control breaks down repeatedly, reduce the demand and rebuild the movement. If the athlete can maintain those qualities while responding to a cue, increase the uncertainty gradually. This approach connects physical preparation to football actions while keeping the training objective visible.'
+      ]},
+      {id:'article-09',expertId:'expert-05',title:'The Rules Shape the Strategy',summary:'Changes to what is legal can alter spacing, technique, and the value of familiar tactics.',body:[
+        'Rules are part of football’s strategic environment. A change to contact, eligible formations, or clock procedure can shift where teams seek an advantage. Coaches respond with new techniques and alignments, while officials and players develop shared expectations about how the rule is applied.',
+        'Historical comparisons work best when they account for those conditions. A tactic that looks unusual in one era may be a direct response to the rules and equipment of that period. Studying the context reveals why a system emerged and which of its principles remain useful after the environment changes. The game evolves through both coaching ideas and the boundaries within which those ideas operate.'
+      ]},
+      {id:'article-10',expertId:'expert-05',title:'How Formations Carry Ideas Across Eras',summary:'Formation concepts persist because their underlying problems remain familiar, even as details change.',body:[
+        'Football formations are snapshots of larger ideas about space, numbers, and responsibility. A formation can create a favorable angle, isolate a defender, or make the defense account for a threat in a different area. Names and alignments change, but the underlying questions recur whenever an offense tries to distribute defenders across the field.',
+        'Comparing formations across eras requires attention to personnel and rules as well as geometry. The same spacing can ask different questions when player roles, allowable contact, or passing tactics differ. Looking past the label helps explain why an old concept can reappear in a modern package—and why copying its shape without its original purpose may not produce the same result.'
+      ]}
+    ];
+    const categories = ['All','Tactics','Trench Play','Management','Performance','History'];
+    const $ = (id) => document.getElementById(id);
+    let activeCategory = 'All';
+    let activeView = 'roster';
+    const highlightVideoId = 'qz07gPQ-d8M';
+    let backgroundVideoPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let backgroundVideoUnavailable = false;
+    let backgroundPlayer = null;
+    let playerApiRequested = false;
+    function updateVideoControls() {
+      document.querySelectorAll('[data-background-toggle]').forEach(button => {
+        button.hidden = backgroundVideoUnavailable;
+        button.textContent = backgroundVideoPaused ? 'Play background video' : (button.closest('#mobile-menu') ? 'Pause background video' : 'Pause video');
+        button.setAttribute('aria-pressed', String(backgroundVideoPaused));
+      });
+    }
+    function showVideoFallback(errorCode = null) {
+      backgroundVideoUnavailable = true;
+      backgroundVideoPaused = true;
+      updateVideoControls();
+      $('ravens-video').classList.add('hidden');
+      $('video-poster').src = `https://i.ytimg.com/vi/${highlightVideoId}/hqdefault.jpg`;
+      $('video-poster').classList.remove('hidden');
+      if (errorCode === 101 || errorCode === 150) {
+        $('video-fallback').textContent = 'The video owner blocks background playback · Watch on YouTube ↗';
+      }
+      $('video-fallback').classList.remove('hidden');
+    }
+    window.onYouTubeIframeAPIReady = () => {
+      backgroundPlayer = new YT.Player('ravens-video', {
+        host: 'https://www.youtube-nocookie.com',
+        videoId: highlightVideoId,
+        playerVars: {autoplay:0,controls:0,loop:1,playlist:highlightVideoId,playsinline:1,rel:0,modestbranding:1,cc_load_policy:0,origin:window.location.origin},
+        events: {
+          onReady: event => {
+            event.target.mute();
+            try { event.target.setOption('captions', 'track', {}); } catch {}
+            event.target.getIframe().setAttribute('title', 'Muted Baltimore Ravens game highlights in the background');
+            event.target.getIframe().setAttribute('tabindex', '-1');
+            event.target.getIframe().setAttribute('aria-hidden', 'true');
+            if (!backgroundVideoPaused) event.target.playVideo();
+          },
+          onError: event => showVideoFallback(event.data)
+        }
+      });
+    };
+    function loadBackgroundPlayer() {
+      if (backgroundPlayer || playerApiRequested) return;
+      playerApiRequested = true;
+      const script = document.createElement('script');
+      script.src = 'https://www.youtube.com/iframe_api';
+      script.onerror = () => {
+        console.error('Could not load the YouTube player API.');
+        showVideoFallback();
+      };
+      document.head.append(script);
+    }
+    function setBackgroundVideoPaused(paused) {
+      if (backgroundVideoUnavailable) return;
+      backgroundVideoPaused = paused;
+      updateVideoControls();
+      if (paused) backgroundPlayer?.pauseVideo();
+      else if (backgroundPlayer) { backgroundPlayer.mute(); backgroundPlayer.playVideo(); }
+      else loadBackgroundPlayer();
+    }
+    document.querySelectorAll('[data-background-toggle]').forEach(button => {
+      button.addEventListener('click', () => setBackgroundVideoPaused(!backgroundVideoPaused));
+    });
+    setBackgroundVideoPaused(backgroundVideoPaused);
+
+    function articleCountFor(category) {
+      return category === 'All' ? articles.length : articles.filter(article => experts.find(expert => expert.id === article.expertId)?.category === category).length;
+    }
+    function renderRoster() {
+      $('roster-grid').innerHTML = experts.map(expert => {
+        const count = articles.filter(article => article.expertId === expert.id).length;
+        return `<article class="group flex flex-col justify-between gap-5 rounded-2xl border border-white/10 bg-gradient-to-br from-[#19152b]/85 to-[#11101b]/85 p-5 shadow-lg backdrop-blur-sm transition duration-200 hover:-translate-y-1 hover:border-[#C49B1A]/50">
+          <div class="space-y-4"><div class="flex items-center justify-between gap-2"><span class="rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#100d1d]" style="background:${expert.color}">${expert.category}</span><span class="font-mono text-[11px] text-slate-500">${expert.id}</span></div>
+          <div><h3 class="text-lg font-extrabold text-white">${expert.name}</h3><p class="mt-2 text-sm leading-relaxed text-slate-400">${expert.bio}</p></div></div>
+          <div class="flex items-center justify-between border-t border-white/10 pt-4"><span class="text-xs text-slate-400"><strong class="text-white">${count}</strong> articles</span><button type="button" data-expert-category="${expert.category}" class="rounded-lg border border-[#C49B1A]/45 px-3 py-2 text-xs font-semibold text-[#F0D577] transition hover:bg-[#241773]">Browse articles <span aria-hidden="true">→</span></button></div>
+        </article>`;
+      }).join('');
+    }
+    function renderFilters() {
+      $('category-filters').innerHTML = categories.map(category => {
+        const selected = category === activeCategory;
+        return `<button type="button" data-category="${category}" aria-pressed="${selected}" class="rounded-full border px-4 py-2 text-xs font-semibold transition ${selected ? 'border-[#C49B1A] bg-[#C49B1A] text-[#171045]' : 'border-white/15 bg-white/[.03] text-slate-300 hover:border-[#C49B1A]/60 hover:text-[#F0D577]'}">${category}<span class="ml-2 font-mono opacity-75">${articleCountFor(category)}</span></button>`;
+      }).join('');
+    }
+    function renderArticles() {
+      const visibleArticles = articles.filter(article => {
+        if (activeCategory === 'All') return true;
+        return experts.find(expert => expert.id === article.expertId)?.category === activeCategory;
+      });
+      $('stream-count').textContent = `Showing ${visibleArticles.length} of ${articles.length} articles`;
+      $('article-list').innerHTML = visibleArticles.map(article => {
+        const expert = experts.find(person => person.id === article.expertId);
+        return `<article class="rounded-2xl border border-white/10 bg-[#151321]/85 p-5 shadow-lg backdrop-blur-sm transition hover:border-[#C49B1A]/35">
+          <div class="flex flex-wrap items-center justify-between gap-2"><span class="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#100d1d]" style="background:${expert.color}">${expert.category}</span><span class="font-mono text-[10px] text-slate-500">${expert.id}</span></div>
+          <h3 class="mt-4 text-lg font-bold leading-snug text-white">${article.title}</h3>
+          <p class="mt-2 text-xs font-medium text-[#E3BF52]">${expert.name}</p>
+          <p class="mt-3 text-sm leading-relaxed text-slate-400">${article.summary}</p>
+          <details class="group mt-4 border-t border-white/10 pt-3"><summary class="cursor-pointer list-none text-xs font-bold text-[#F0D577] marker:hidden"><span class="group-open:hidden">Read full article <span aria-hidden="true">＋</span></span><span class="hidden group-open:inline">Close article <span aria-hidden="true">−</span></span></summary>
+            <div class="mt-3 space-y-3 text-sm leading-7 text-slate-300">${article.body.map(paragraph => `<p>${paragraph}</p>`).join('')}</div></details>
+        </article>`;
+      }).join('');
+    }
+    function setCategory(category) {
+      activeCategory = categories.includes(category) ? category : 'All';
+      renderFilters();
+      renderArticles();
+    }
+    function showView(view, category = null) {
+      activeView = view === 'content' ? 'content' : 'roster';
+      if (activeView === 'content' && category !== null) setCategory(category);
+      document.querySelectorAll('[data-view]').forEach(panel => {
+        const visible = panel.dataset.view === activeView;
+        panel.hidden = !visible;
+        panel.classList.toggle('view-enter', visible);
+      });
+      document.querySelectorAll('.nav-link').forEach(button => {
+        const selected = button.dataset.viewTarget === activeView;
+        button.setAttribute('aria-current', selected ? 'page' : 'false');
+        button.className = `nav-link rounded-lg px-4 py-2 text-sm font-semibold transition ${selected ? 'bg-[#C49B1A] text-[#171045]' : 'text-white hover:bg-white/10'}`;
+      });
+      $('mobile-menu').classList.add('hidden');
+      $('menu-toggle').setAttribute('aria-expanded', 'false');
+      $('menu-toggle').setAttribute('aria-label', 'Open navigation menu');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    document.addEventListener('click', event => {
+      const viewButton = event.target.closest('[data-view-target]');
+      if (viewButton) { showView(viewButton.dataset.viewTarget); return; }
+      const expertButton = event.target.closest('[data-expert-category]');
+      if (expertButton) { showView('content', expertButton.dataset.expertCategory); return; }
+      const categoryButton = event.target.closest('[data-category]');
+      if (categoryButton) { setCategory(categoryButton.dataset.category); return; }
+      if (event.target.closest('[data-schema-open]')) {
+        $('schema-modal').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        $('close-schema').focus();
+      }
+    });
+    $('back-to-roster').addEventListener('click', () => showView('roster'));
+    $('menu-toggle').addEventListener('click', () => {
+      const isOpen = !$('mobile-menu').classList.contains('hidden');
+      $('mobile-menu').classList.toggle('hidden', isOpen);
+      $('menu-toggle').setAttribute('aria-expanded', String(!isOpen));
+      $('menu-toggle').setAttribute('aria-label', isOpen ? 'Open navigation menu' : 'Close navigation menu');
+    });
+    function closeSchema() {
+      $('schema-modal').classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+    $('close-schema').addEventListener('click', closeSchema);
+    $('schema-modal').addEventListener('click', event => { if (event.target === $('schema-modal')) closeSchema(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && !$('schema-modal').classList.contains('hidden')) closeSchema(); });
+    $('copy-sql-btn').addEventListener('click', async () => {
+      const text = $('sql-code-block').innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        $('copy-sql-btn').textContent = 'Copied';
+        setTimeout(() => $('copy-sql-btn').textContent = 'Copy SQL script', 1800);
+      } catch {
+        const area = document.createElement('textarea');
+        area.value = text; area.style.position = 'fixed'; area.style.opacity = '0';
+        document.body.append(area); area.select();
+        const copied = document.execCommand('copy'); area.remove();
+        $('copy-sql-btn').textContent = copied ? 'Copied' : 'Copy unavailable';
+        setTimeout(() => $('copy-sql-btn').textContent = 'Copy SQL script', 1800);
+      }
+    });
+    renderRoster();
+    renderFilters();
+    renderArticles();
+    showView('roster');
+  </script>
+</body>
+</html>
