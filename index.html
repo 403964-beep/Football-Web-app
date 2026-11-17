@@ -49,6 +49,7 @@
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
       </div>
+      <div id="auth-root" class="shrink-0"></div>
     </div>
     <nav id="mobile-menu" class="hidden border-t border-white/15 px-4 py-3 md:hidden" aria-label="Mobile navigation">
       <div class="mx-auto flex max-w-7xl flex-col gap-2">
@@ -402,5 +403,6 @@ CREATE POLICY "Users manage own queries" ON public.submitted_queries FOR ALL USI
     renderArticles();
     showView('roster');
   </script>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

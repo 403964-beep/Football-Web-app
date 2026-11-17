@@ -1,0 +1,42 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server/index.ts",
+  "scripts": {
+    "dev": "tsx server/index.ts",
+    "build": "vite build",
+    "start": "NODE_ENV=production tsx server/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/403964-beep/Football-Web-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/403964-beep/Football-Web-app/issues"
+  },
+  "homepage": "https://github.com/403964-beep/Football-Web-app#readme",
+  "dependencies": {
+    "@clerk/express": "^2.1.91",
+    "@clerk/react": "^6.18.9",
+    "@clerk/shared": "^4.46.0",
+    "@clerk/themes": "^2.4.57",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.6",
+    "@vitejs/plugin-react": "^6.3.0",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "http-proxy-middleware": "^4.2.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "wouter": "^3.13.0"
+  }
+}

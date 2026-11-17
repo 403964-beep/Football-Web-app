@@ -1,13 +1,13 @@
 # Running this project on Replit
 
-This project is a static HTML page. The `Start application` workflow serves it on port 5000 for the Replit preview:
+The Flock Forecast uses a Vite-served HTML/React client with an Express server. The `Start application` workflow runs the app on port 5000:
 
 ```sh
-python3 -m http.server 5000 --bind 0.0.0.0
+npm run dev
 ```
 
-No dependency installation or environment secrets are needed to view the page. Tailwind CSS and the Inter font load from public CDNs, so styling requires internet access.
+Sign-in, sign-up, and sign-out use Replit-managed Clerk. Development and production accounts are separate. Tailwind CSS and the Inter font load from public CDNs, so styling requires internet access.
 
-The page is a static single-page football advisory app. It has a responsive roster/content navigation, five expert profiles, ten locally seeded sample articles, category filters and live counts, an on-demand database schema modal, and a YouTube background player configured to suppress captions. If YouTube blocks embedding, the player falls back to the video's thumbnail and a direct YouTube link. Tailwind CSS and the Inter font load from public CDNs.
+The football advisory page has a responsive roster/content navigation, five expert profiles, ten locally seeded sample articles, category filters and live counts, an on-demand database schema modal, and a YouTube background player configured to suppress captions. If YouTube blocks embedding, the player falls back to the video's thumbnail and a direct YouTube link.
 
 The article data and counts are currently local to the browser; they are not persisted to Supabase. The SQL is displayed for review only and is never executed by the page. Before applying it to a Supabase project, review the row-level security policies and privileges for your use case. Never put a Supabase service-role key in this public HTML file.
